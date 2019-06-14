@@ -31,9 +31,11 @@ class SpoilerExtension(Extension):
         """ Add pieces to Markdown. """
         md.registerExtension(self)
 
-        # Execute after links were parsed
-        md.treeprocessors.register(SpoilerLinkTreeprocessor(self), 'spoiler_links', 0)
+        # Run after inline patterns parse markdown links
+        md.treeprocessors.register(SpoilerLinkTreeprocessor(self), 'spoiler_links', 19)
         spoiler_processor = SpoilerInlineProcessor(REDDIT_NOTATION_PATTERN)
+
+        # Run early in inline pattern process, we need to run before the LinkInlineProcessor
         md.inlinePatterns.register(spoiler_processor, 'spoiler_reddit', 165)
 
         # Run after SpoilerInlineProcessor to merge some nodes
