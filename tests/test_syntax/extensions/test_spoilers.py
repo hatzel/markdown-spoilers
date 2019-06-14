@@ -68,3 +68,12 @@ class TestSpoilers(TestCase):
                 '</p>',
                 extensions=['spoilers'],
             )
+
+    def test_new_notation(self):
+        """Test for reddit's new notation of the format >!Spoiler!<"""
+        self.assertMarkdownRenders(
+            'This will be a spoiler: >!everybody dies!!<',
+            '<p>This will be a spoiler: '
+            '<span class="spoiler">everybody dies!''</span></p>',
+            extensions=['spoilers'],
+        )

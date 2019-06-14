@@ -13,8 +13,11 @@ License: [BSD](https://opensource.org/licenses/bsd-license.php)
 
 """
 from . import Extension
+from .. import util
 from markdown.treeprocessors import Treeprocessor
+from markdown.inlinepatterns import InlineProcessor
 
+REDDIT_NOTATION_PATTERN = r'>!(?P<spoiler>.*?)!<'
 
 class SpoilerExtension(Extension):
     """Spoiler Extension. """
@@ -29,6 +32,8 @@ class SpoilerExtension(Extension):
 
         # Execute after links were parsed
         md.treeprocessors.register(SpoilerLinkTreeprocessor(self), 'spoiler_links', 0)
+        spoiler_processor = SpoilerInlineProcessor(REDDIT_NOTATION_PATTERN)
+        md.inlinePatterns.register(spoiler_processor, 'spoiler_reddit', 165)
 
 
 class SpoilerLinkTreeprocessor(Treeprocessor):
@@ -57,6 +62,25 @@ class SpoilerLinkTreeprocessor(Treeprocessor):
                         mark_spoiler(link, topic=link.text)
                         link.text = new_text
                         break
+
+
+class SpoilerInlineProcessor(InlineProcessor):
+    """Processor for reddit's new inline spoiler syntax."""
+
+    def handleMatch(self, m, data):
+        spoiler = make_spoiler_tag(m.group("spoiler"))
+        return spoiler, m.start(0), m.end(0)
+
+
+def make_spoiler_tag(text=None, topic=None):
+    """Create spoiler tree element."""
+    spoiler = util.etree.Element("span")
+    spoiler.attrib["class"] = "spoiler"
+    if text is not None:
+        spoiler.text = text
+    if topic is not None:
+        spoiler.attrib["topic"] = topic
+    return spoiler
 
 
 def mark_spoiler(element, topic=None):
