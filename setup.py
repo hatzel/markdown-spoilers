@@ -125,6 +125,7 @@ setup(
             'wikilinks = markdown.extensions.wikilinks:WikiLinkExtension',
             'legacy_attrs = markdown.extensions.legacy_attrs:LegacyAttrExtension',
             'legacy_em = markdown.extensions.legacy_em:LegacyEmExtension',
+            'spoilers = markdown.extensions.spoilers:SpoilerExtension',
         ]
     },
     classifiers=[
