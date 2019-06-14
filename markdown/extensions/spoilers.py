@@ -43,7 +43,12 @@ class SpoilerLinkTreeprocessor(Treeprocessor):
         links = root.findall(".//a")
         for link in links:
             if link.get("href") in self.TAGS:
-                mark_spoiler(link)
+                if link.get("title") is not None:
+                    text = link.text
+                    link.text = link.get("title")
+                    mark_spoiler(link, topic=text)
+                else:
+                    mark_spoiler(link)
             else:
                 for tag in self.TAGS:
                     if link.get("href") is not None \
@@ -59,7 +64,7 @@ def mark_spoiler(element, topic=None):
     element.tag = "span"
     element.attrib.clear()
     element.attrib["class"] = "spoiler"
-    if topic:
+    if topic is not None:
         element.attrib["topic"] = topic
 
 

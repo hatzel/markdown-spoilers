@@ -46,6 +46,16 @@ class TestSpoilers(TestCase):
                 extensions=['spoilers'],
             )
 
+    def test_tagged_notation_with_quotes(self):
+        """Test tagged spoiler notation."""
+        for symbol in ["/spoiler", "#spoiler", "/s", "#s"]:
+            self.assertMarkdownRenders(
+                'This will be a spoiler: [Season 4](%s "everybody dies!")' % symbol,
+                '<p>This will be a spoiler: '
+                '<span class="spoiler" topic="Season 4">everybody dies!</span></p>',
+                extensions=['spoilers'],
+            )
+
     def test_tagged_notation_multiple(self):
         """Test multiple tagged spoiler notation."""
         for symbol in ["/spoiler", "#spoiler", "/s", "#s"]:
