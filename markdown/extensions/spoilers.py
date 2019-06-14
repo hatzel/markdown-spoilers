@@ -17,7 +17,8 @@ from .. import util
 from markdown.treeprocessors import Treeprocessor
 from markdown.inlinepatterns import InlineProcessor
 
-REDDIT_NOTATION_PATTERN = r'>!(?P<spoiler>.*?)!<'
+REDDIT_NOTATION_PATTERN = r'(\[(?P<tag>.*)\]\s)?>!(?P<spoiler>.*?)!<'
+
 
 class SpoilerExtension(Extension):
     """Spoiler Extension. """
@@ -34,6 +35,9 @@ class SpoilerExtension(Extension):
         md.treeprocessors.register(SpoilerLinkTreeprocessor(self), 'spoiler_links', 0)
         spoiler_processor = SpoilerInlineProcessor(REDDIT_NOTATION_PATTERN)
         md.inlinePatterns.register(spoiler_processor, 'spoiler_reddit', 165)
+
+        # Run after SpoilerInlineProcessor to merge some nodes
+        md.treeprocessors.register(SpoilerMergeTreeprocessor(self), 'spoiler_merger', 18)
 
 
 class SpoilerLinkTreeprocessor(Treeprocessor):
@@ -64,11 +68,30 @@ class SpoilerLinkTreeprocessor(Treeprocessor):
                         break
 
 
+class SpoilerMergeTreeprocessor(Treeprocessor):
+    """
+    Preprocessor to merge some spoiler tags.
+
+    We only merge the specific case when one spoiler tag contains only one spoiler tag with only one of them having
+    a topic.
+    """
+
+    def run(self, root):
+        spoilers = root.findall(".//span[@class='spoiler']")
+        for spoiler in spoilers:
+            children = spoiler.findall("./span[@class='spoiler']")
+            if (len(children) == 1 and (children[0].get("topic") is None or spoiler.get("topic") is None)):
+                child = children[0]
+                spoiler.text = (spoiler.text or "") + (child.text or "")
+                spoiler.attrib["class"] = spoiler.get("class") or child.get("class")
+                spoiler.remove(child)
+
+
 class SpoilerInlineProcessor(InlineProcessor):
     """Processor for reddit's new inline spoiler syntax."""
 
     def handleMatch(self, m, data):
-        spoiler = make_spoiler_tag(m.group("spoiler"))
+        spoiler = make_spoiler_tag(m.group("spoiler"), m.group("tag"))
         return spoiler, m.start(0), m.end(0)
 
 

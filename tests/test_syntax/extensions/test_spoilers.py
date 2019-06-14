@@ -73,7 +73,33 @@ class TestSpoilers(TestCase):
         """Test for reddit's new notation of the format >!Spoiler!<"""
         self.assertMarkdownRenders(
             'This will be a spoiler: >!everybody dies!!<',
+            '<p>This will be a spoiler: <span class="spoiler">everybody dies!''</span></p>',
+            extensions=['spoilers'],
+        )
+
+    def test_new_notation_multiple(self):
+        """Test for multiple of reddit's new notation of the format: >!Spoiler!<"""
+        self.assertMarkdownRenders(
+            'This will be a spoiler: >!everybody dies!!< also they are >!killed by the monster!<.',
             '<p>This will be a spoiler: '
-            '<span class="spoiler">everybody dies!''</span></p>',
+            '<span class="spoiler">everybody dies!''</span>'
+            ' also they are <span class="spoiler">killed by the monster</span>.</p>',
+            extensions=['spoilers'],
+        )
+
+    def test_new_notation_tagged(self):
+        """Test for a custom tagged variant that can be found in the wild.
+
+        For an example see the sidebar on: https://www.reddit.com/r/asoiaf/"""
+        self.assertMarkdownRenders(
+            'This will be a spoiler: [Season 4] >!everybody dies!!<',
+            '<p>This will be a spoiler: <span class="spoiler" topic="Season 4">everybody dies!</span></p>',
+            extensions=['spoilers'],
+        )
+
+    def test_combination_new_old(self):
+        self.assertMarkdownRenders(
+            'This will be a spoiler: >![Season 4](/s everybody dies!)!<',
+            '<p>This will be a spoiler: <span class="spoiler">everybody dies!</span></p>',
             extensions=['spoilers'],
         )
