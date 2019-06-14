@@ -30,16 +30,31 @@ class TestSpoilers(TestCase):
         """Test postfix spoiler notation."""
         for symbol in ["/spoiler", "#spoiler", "/s", "#s"]:
             self.assertMarkdownRenders(
-                'This will be a [spoiler](%s)' % symbol,
-                '<p>This will be a <span class="spoiler">spoiler</span></p>',
+                'This will be a spoiler: [everybody dies!](%s)' % symbol,
+                '<p>This will be a spoiler: '
+                '<span class="spoiler">everybody dies!</span></p>',
                 extensions=['spoilers'],
             )
 
-    def test_prefix_notation(self):
-        """Test postfix spoiler notation."""
+    def test_tagged_notation(self):
+        """Test tagged spoiler notation."""
         for symbol in ["/spoiler", "#spoiler", "/s", "#s"]:
             self.assertMarkdownRenders(
-                'This will be a [spoiler](%s)' % symbol,
-                '<p>This will be a <span class="spoiler">spoiler</span></p>',
+                'This will be a spoiler: [Season 4](%s everybody dies!)' % symbol,
+                '<p>This will be a spoiler: '
+                '<span class="spoiler" topic="Season 4">everybody dies!</span></p>',
+                extensions=['spoilers'],
+            )
+
+    def test_tagged_notation_multiple(self):
+        """Test multiple tagged spoiler notation."""
+        for symbol in ["/spoiler", "#spoiler", "/s", "#s"]:
+            self.assertMarkdownRenders(
+                'This will be a spoiler: [Season 4](%s everybody dies!)' % symbol + \
+                ' also they are [Episode 7](%s killed by the monster).' % symbol,
+                '<p>This will be a spoiler: '
+                '<span class="spoiler" topic="Season 4">everybody dies!</span>'
+                ' also they are <span class="spoiler" topic="Episode 7">killed by the monster</span>.'
+                '</p>',
                 extensions=['spoilers'],
             )

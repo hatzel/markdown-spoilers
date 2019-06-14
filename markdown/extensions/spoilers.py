@@ -35,17 +35,32 @@ class SpoilerLinkTreeprocessor(Treeprocessor):
     """
     The history notation used on reddit.
 
-    This notation relied on a hack, so links to specific urls are considered spoiler tags.
+    This notation relied on a hack, so links to specific URLs are considered spoiler tags.
     """
-    TAGS = ["/s", "/spoiler", "#s", "#spoiler"]
+    TAGS = ["/spoiler", "/s", "#spoiler", "#s"]
 
     def run(self, root):
         links = root.findall(".//a")
         for link in links:
             if link.get("href") in self.TAGS:
-                link.tag = "span"
-                link.attrib.clear()
-                link.attrib["class"] = "spoiler"
+                mark_spoiler(link)
+            else:
+                for tag in self.TAGS:
+                    if link.get("href") is not None \
+                       and link.get("href").startswith(tag + " "):
+                        new_text = link.attrib["href"][len(tag) + 1:]
+                        mark_spoiler(link, topic=link.text)
+                        link.text = new_text
+                        break
+
+
+def mark_spoiler(element, topic=None):
+    """Make tree element a spoiler span."""
+    element.tag = "span"
+    element.attrib.clear()
+    element.attrib["class"] = "spoiler"
+    if topic:
+        element.attrib["topic"] = topic
 
 
 def makeExtension(**kwargs):  # pragma: no cover
