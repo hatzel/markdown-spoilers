@@ -17,7 +17,7 @@ from .. import util
 from markdown.treeprocessors import Treeprocessor
 from markdown.inlinepatterns import InlineProcessor
 
-REDDIT_NOTATION_PATTERN = r'(\[(?P<tag>.*)\]\s)?>!(?P<spoiler>.*?)!<'
+REDDIT_NOTATION_PATTERN = r'(\[(?P<tag>.*)\]\s)?>!\s?(?P<spoiler>.*?)\s?!<'
 
 
 class SpoilerExtension(Extension):
